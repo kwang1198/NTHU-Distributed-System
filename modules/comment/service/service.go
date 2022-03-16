@@ -35,8 +35,8 @@ gRPC TODO:
  3. Pack the array into correct format.
 */
 func (s *service) ListComment(ctx context.Context, req *pb.ListCommentRequest) (*pb.ListCommentResponse, error) {
-	video_id := req.GetVideoId()
-	comments, err := s.commentDAO.ListByVideoID(ctx, video_id, int(req.GetLimit()), int(req.GetOffset()))
+	videoID := req.GetVideoId()
+	comments, err := s.commentDAO.ListByVideoID(ctx, videoID, int(req.GetLimit()), int(req.GetOffset()))
 	if err != nil {
 		return nil, err
 	}
@@ -58,9 +58,8 @@ gRPC TODO:
 4. Return the result. You may use .String() method to transform the return value of dao API to a string.
 */
 func (s *service) CreateComment(ctx context.Context, req *pb.CreateCommentRequest) (*pb.CreateCommentResponse, error) {
-
-	video_id := req.GetVideoId()
-	_, err := s.videoClient.GetVideo(ctx, &videopb.GetVideoRequest{Id: video_id})
+	videoID := req.GetVideoId()
+	_, err := s.videoClient.GetVideo(ctx, &videopb.GetVideoRequest{Id: videoID})
 
 	if err != nil {
 		return nil, err
@@ -68,17 +67,17 @@ func (s *service) CreateComment(ctx context.Context, req *pb.CreateCommentReques
 
 	comment := &dao.Comment{
 		ID:      uuid.UUID{},
-		VideoID: video_id,
+		VideoID: videoID,
 		Content: req.GetContent(),
 	}
 
-	uuid, err := s.commentDAO.Create(ctx, comment)
+	id, err := s.commentDAO.Create(ctx, comment)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return &pb.CreateCommentResponse{Id: uuid.String()}, nil
+	return &pb.CreateCommentResponse{Id: id.String()}, nil
 }
 
 /*
@@ -128,9 +127,9 @@ gRPC TODO: 1. Call dao API to delete comments by video id and do error handling.
 	  2. Return the response.
 */
 func (s *service) DeleteCommentByVideoID(ctx context.Context, req *pb.DeleteCommentByVideoIDRequest) (*pb.DeleteCommentByVideoIDResponse, error) {
-	video_id := req.GetVideoId()
+	videoID := req.GetVideoId()
 
-	if err := s.commentDAO.DeleteByVideoID(ctx, video_id); err != nil {
+	if err := s.commentDAO.DeleteByVideoID(ctx, videoID); err != nil {
 		return nil, err
 	}
 	return &pb.DeleteCommentByVideoIDResponse{}, nil
